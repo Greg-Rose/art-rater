@@ -8,7 +8,7 @@ module.exports.show = (req, res) => {
     });
   } else {
     User
-      .findById(req.user.id, 'email')
+      .findById(req.user.id, 'username email')
       .exec((err, user) => {
         res.status(200).json(user);
       });

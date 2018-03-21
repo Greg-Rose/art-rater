@@ -2,17 +2,18 @@ const mongoose = require('mongoose');
 const Poem = mongoose.model('Poem');
 
 module.exports.index = (req, res) => {
-  Poem.find({}, 'title body', (err, poems) => {
+  Poem.find({}, 'title body artist', (err, poems) => {
     if (err) { res.send(err); }
 
     res.json(poems);
-  });
+  }).populate({ path: 'artist', select: 'username' });
 };
 
 module.exports.create = (req, res) => {
   let poem = new Poem({
     title: req.body.title,
-    body: req.body.body
+    body: req.body.body,
+    artist: req.user.id
   });
 
   poem.save((err) => {
@@ -23,7 +24,7 @@ module.exports.create = (req, res) => {
 };
 
 module.exports.show = (req, res) => {
-  Poem.findById(req.params.id, 'title body', (err, poem) => {
+  Poem.findById(req.params.id, 'title body artist', (err, poem) => {
     if (err) { res.send(err); }
 
     if(!poem) {
@@ -33,7 +34,7 @@ module.exports.show = (req, res) => {
     }
 
     res.json(poem);
-  });
+  }).populate({ path: 'artist', select: 'username' });
 };
 
 module.exports.delete = (req, res) => {
@@ -46,14 +47,20 @@ module.exports.delete = (req, res) => {
       });
     }
 
-    poem.remove()
-      .then(() => {
-        res.status(200).json({
-          message: 'Poem deleted'
+    if(poem.artist.id === req.user.id) {
+      poem.remove()
+        .then(() => {
+          res.status(200).json({
+            message: 'Poem deleted'
+          });
+        })
+        .catch(err => {
+          return res.send(err);
         });
-      })
-      .catch(err => {
-        return res.send(err);
+    } else {
+      return res.status(401).json({
+        message: 'UnauthorizedError: You can only delete your own poems'
       });
-  });
+    }
+  }).populate('artist');
 };

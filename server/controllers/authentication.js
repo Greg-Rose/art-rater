@@ -5,12 +5,18 @@ const User = mongoose.model('User');
 module.exports.register = (req, res) => {
   let email = req.body.email.toLowerCase();
 
-  User.find({ email: email })
+  User.find({ $or: [{ username: req.body.username }, { email: email }] })
     .exec()
     .then(user => {
       if(user.length > 0) {
+        let message;
+        if(user[0].email === email) {
+          message = "Email already in use";
+        } else {
+          message = "Username taken";
+        }
         return res.status(409).json({
-          message: 'Email already in use'
+          message: message
         });
       } else {
         bcrypt.hash(req.body.password, 10, (err, hash) => {
@@ -20,6 +26,7 @@ module.exports.register = (req, res) => {
             });
           } else {
             const user = new User({
+              username: req.body.username,
               email: email,
               password: hash
             });
