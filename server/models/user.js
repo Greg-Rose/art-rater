@@ -5,13 +5,16 @@ const UserSchema = new mongoose.Schema({
   username: {
     type: String,
     unique: true,
-    required: true
+    required: true,
+    minlength: [3, 'Username must be at least 3 characters long'],
+    maxlength: [20, 'Username must be 20 or fewer characters long']
   },
   email: {
     type: String,
     unique: true,
     required: true,
-    match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+    match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/,
+    maxlength: 254
   },
   password: {
     type: String,

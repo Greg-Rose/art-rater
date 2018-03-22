@@ -54,20 +54,21 @@ module.exports.register = (req, res) => {
 
 module.exports.login = (req, res) => {
   let email = req.body.email.toLowerCase();
+  let failedMessage = 'Login failed, check your email and password';
 
   User.find({ email: email })
     .exec()
     .then(user => {
       if(user.length < 1) {
         return res.status(401).json({
-          message: 'Login failed, check your email and password'
+          message: failedMessage
         });
       }
 
       bcrypt.compare(req.body.password, user[0].password, (err, result) => {
         if(err) {
           return res.status(401).json({
-            message: 'Login failed, check your email and password'
+            message: failedMessage
           });
         }
         if(result) {
@@ -78,7 +79,7 @@ module.exports.login = (req, res) => {
           });
         } else {
           return res.status(401).json({
-            message: 'Login failed, check your email and password'
+            message: failedMessage
           });
         }
       });
