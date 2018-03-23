@@ -9,6 +9,7 @@ const ctrlProfile = require('../controllers/profile');
 const ctrlAuth = require('../controllers/authentication');
 const ctrlPoems = require('../controllers/poem');
 const registrationValidation = require('../validation/register');
+const poemValidation = require('../validation/poem');
 
 // profile
 router.get('/profile', auth, ctrlProfile.show);
@@ -21,7 +22,7 @@ router.post('/login', ctrlAuth.login);
 router.get('/poems', ctrlPoems.index);
 
 // Create poem
-router.post('/poems', auth, ctrlPoems.create);
+router.post('/poems', auth, poemValidation.check, poemValidation.result, ctrlPoems.create);
 
 // Show poem
 router.get('/poems/:id', ctrlPoems.show);
