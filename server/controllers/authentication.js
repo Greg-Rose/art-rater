@@ -3,53 +3,37 @@ const bcrypt = require('bcrypt');
 const User = mongoose.model('User');
 
 module.exports.register = (req, res) => {
-  let email = req.body.email.toLowerCase();
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
+    let email = req.body.email.toLowerCase();
 
-  User.find({ $or: [{ username: req.body.username }, { email: email }] })
-    .exec()
-    .then(user => {
-      if(user.length > 0) {
-        let message;
-        if(user[0].email === email) {
-          message = "Email already in use";
-        } else {
-          message = "Username taken";
-        }
-        return res.status(409).json({
-          message: message
-        });
-      } else {
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
-          if(err) {
-            return res.status(500).json({
-              error: err
-            });
-          } else {
-            const user = new User({
-              username: req.body.username,
-              email: email,
-              password: hash
-            });
+    if(err) {
+      return res.status(500).json({
+        error: err
+      });
+    } else {
+      const user = new User({
+        username: req.body.username,
+        email: email,
+        password: hash
+      });
 
-            user.save()
-              .then(result => {
-                console.log(`Account created: ${email}`);
-                let token = user.generateJwt();
-                res.status(201).json({
-                  message: 'Account created',
-                  token: token
-                });
-              })
-              .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                  error: err
-                });
-              });
-          }
+      user.save()
+        .then(result => {
+          console.log(`Account created: ${email}`);
+          let token = user.generateJwt();
+          res.status(201).json({
+            message: 'Account created',
+            token: token
+          });
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(500).json({
+            error: err
+          });
         });
-      }
-    });
+    }
+  });
 };
 
 module.exports.login = (req, res) => {

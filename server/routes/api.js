@@ -8,12 +8,13 @@ const auth = jwt({
 const ctrlProfile = require('../controllers/profile');
 const ctrlAuth = require('../controllers/authentication');
 const ctrlPoems = require('../controllers/poem');
+const registrationValidation = require('../validation/register');
 
 // profile
 router.get('/profile', auth, ctrlProfile.show);
 
 // authentication
-router.post('/register', ctrlAuth.register);
+router.post('/register', registrationValidation.check, registrationValidation.result, ctrlAuth.register);
 router.post('/login', ctrlAuth.login);
 
 // Get poems
