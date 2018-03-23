@@ -2,10 +2,14 @@ const mongoose = require('mongoose');
 const Poem = mongoose.model('Poem');
 
 module.exports.index = (req, res) => {
-  Poem.find({}, 'title body artist', (err, poems) => {
+  Poem.find({}, 'title body artist createdAt', (err, poems) => {
     if (err) { res.send(err); }
 
-    res.json(poems);
+    let response = {
+      count: poems.length,
+      poems: poems
+    };
+    res.status(200).json(response);
   }).populate({ path: 'artist', select: 'username' });
 };
 
@@ -19,12 +23,23 @@ module.exports.create = (req, res) => {
   poem.save((err) => {
     if (err) { res.send(err); }
 
-    res.json({ message: 'Poem created!' });
+    Poem.populate(poem, { path: 'artist', select: 'username' }, function(err, poem) {
+      res.status(201).json({
+        message: 'Poem created!',
+        poem: {
+          _id: poem.id,
+          title: poem.title,
+          body: poem.body,
+          artist: poem.artist,
+          createdAt: poem.createdAt
+        }
+      });
+    });
   });
 };
 
 module.exports.show = (req, res) => {
-  Poem.findById(req.params.id, 'title body artist', (err, poem) => {
+  Poem.findById(req.params.id, 'title body artist createdAt', (err, poem) => {
     if (err) { res.send(err); }
 
     if(!poem) {
@@ -33,7 +48,7 @@ module.exports.show = (req, res) => {
       });
     }
 
-    res.json(poem);
+    res.status(200).json(poem);
   }).populate({ path: 'artist', select: 'username' });
 };
 
